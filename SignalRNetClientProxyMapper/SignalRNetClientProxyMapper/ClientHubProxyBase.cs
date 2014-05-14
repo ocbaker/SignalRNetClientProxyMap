@@ -24,7 +24,7 @@ namespace SignalRNetClientProxyMapper
         }
 
         internal Task<T> InvokeReturn<T>(string method, params object[] args) {
-            return _hubProxy.Invoke<T>(method, args);
+            return Invoke<T>(method, args);
         }
 
         public Subscription Subscribe(string eventName) {
