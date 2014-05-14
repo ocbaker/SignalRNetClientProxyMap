@@ -1,6 +1,4 @@
-﻿using System.Diagnostics;
-using System.Runtime.CompilerServices;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using ImpromptuInterface.Dynamic;
 using Microsoft.AspNet.SignalR.Client;
 using Microsoft.AspNet.SignalR.Client.Hubs;
@@ -23,12 +21,12 @@ namespace SignalRNetClientProxyMapper
             return _hubProxy.Invoke<T>(method, args);
         }
 
-        internal Task<T> InvokeReturn<T>(string method, params object[] args) {
-            return Invoke<T>(method, args);
-        }
-
         public Subscription Subscribe(string eventName) {
             return _hubProxy.Subscribe(eventName);
+        }
+
+        internal Task<T> InvokeReturn<T>(string method, params object[] args) {
+            return Invoke<T>(method, args);
         }
     }
 }
