@@ -5,6 +5,8 @@ VisualStudioVersion = 12.0.30324.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SignalRNetClientProxyMapper", "SignalRNetClientProxyMapper\SignalRNetClientProxyMapper.csproj", "{241CA3A8-15B4-4EB1-BA48-0B38FB467E1F}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tests", "Tests\Tests.csproj", "{AD1A64FE-DD89-4EF5-BD4B-224699358A35}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +17,10 @@ Global
 		{241CA3A8-15B4-4EB1-BA48-0B38FB467E1F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{241CA3A8-15B4-4EB1-BA48-0B38FB467E1F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{241CA3A8-15B4-4EB1-BA48-0B38FB467E1F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AD1A64FE-DD89-4EF5-BD4B-224699358A35}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AD1A64FE-DD89-4EF5-BD4B-224699358A35}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AD1A64FE-DD89-4EF5-BD4B-224699358A35}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AD1A64FE-DD89-4EF5-BD4B-224699358A35}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
