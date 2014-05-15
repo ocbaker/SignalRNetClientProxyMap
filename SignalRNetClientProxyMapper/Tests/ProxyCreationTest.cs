@@ -41,6 +41,16 @@ namespace Tests
         }
 
         [Test]
+        public void CanCallActionsWithNoParametersAndAlternativeName() {
+            var testProxy = TestProxy.GetStrongTypedClientProxy(_hubProxy);
+
+            testProxy.ActionWithNoParametersAndAlternativeName();
+
+            A.CallTo(() => _hubProxy.Invoke(A<string>.Ignored, A<object[]>.That.IsEmpty()))
+                .MustHaveHappened(Repeated.Exactly.Once);
+        }
+
+        [Test]
         public void CanCallFunctionsWithNoParameters() {
             var testProxy = TestProxy.GetStrongTypedClientProxy(_hubProxy);
 
@@ -61,6 +71,16 @@ namespace Tests
         }
 
         [Test]
+        public void CanCallFunctionsWithNoParametersAndAlternativeName() {
+            var testProxy = TestProxy.GetStrongTypedClientProxy(_hubProxy);
+
+            testProxy.FunctionWithNoParametersAndAlternativeName();
+
+            A.CallTo(() => _hubProxy.Invoke<string>(A<string>.Ignored, A<object[]>.That.IsEmpty()))
+                .MustHaveHappened(Repeated.Exactly.Once);
+        }
+
+        [Test]
         public void CanSubscribeToEventWithNoParameters() {
             var testProxy = TestProxy.GetStrongTypedClientProxy(_hubProxy);
 
@@ -72,6 +92,13 @@ namespace Tests
             var testProxy = TestProxy.GetStrongTypedClientProxy(_hubProxy);
 
             testProxy.subscribableEventWithParameter(paramter => { });
+        }
+
+        [Test]
+        public void CanSubscribeToEventWithNoParametersAndAlternativeName() {
+            var testProxy = TestProxy.GetStrongTypedClientProxy(_hubProxy);
+
+            testProxy.subscribableEventWithNoParametersAndAlternativeName(() => { });
         }
 
         [Test]
@@ -119,10 +146,17 @@ namespace Tests
         //IObservable<string> ObservedEvent { get; set; }
         IDisposable subscribableEventWithNoParameters(Action action);
         IDisposable subscribableEventWithParameter(Action<string> action);
+        [HubMethodName("AlternativeName")]
+        IDisposable subscribableEventWithNoParametersAndAlternativeName(Action action);
 
         Task ActionWithNoParameters();
         Task ActionWithParameter(string message);
+        [HubMethodName("AlternativeName")]
+        Task ActionWithNoParametersAndAlternativeName();
+
         Task<string> FunctionWithNoParameters();
         Task<string> FunctionWithParameter(string message);
+        [HubMethodName("AlternativeName")]
+        Task<string> FunctionWithNoParametersAndAlternativeName();
     }
 }

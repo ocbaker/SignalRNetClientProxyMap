@@ -11,7 +11,8 @@
         <requireLicenseAcceptance>false</requireLicenseAcceptance>
         <description>Enables you to create Strong Typed Interfaces for SignalR Hubs on a .NET Client</description>
         <summary>Enables you to create Strong Typed Interfaces for SignalR Hubs on a .NET Client</summary>
-        <releaseNotes>Changed method of subscribing to events.</releaseNotes>
+        <releaseNotes>Changed method of subscribing to events.
+Added HubMethodName ability for Client.</releaseNotes>
         <copyright>Copyright Oliver C. Baker 2014</copyright>
         <language>en-US</language>
         <dependencies>

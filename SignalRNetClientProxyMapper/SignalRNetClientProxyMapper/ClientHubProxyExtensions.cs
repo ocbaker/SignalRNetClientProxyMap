@@ -49,46 +49,11 @@ namespace SignalRNetClientProxyMapper
 
             var arguments = method.GetParameters()[0].ParameterType.GenericTypeArguments.Length;
 
-            //Consider having Method Attributes to specify custom name type.
             var name = method.Name;
+            var hubName = GetHubName(method);
 
-            switch (arguments) {
-            case 0:
-                proxy.Add(name, (Func<Action, IDisposable>) (action => proxy.HubProxy.On(name, action)));
-                break;
-            case 1:
-                proxy.Add(name,
-                    (Func<Action<dynamic>, IDisposable>) (action => { return proxy.HubProxy.On(name, action); }));
-                break;
-            case 2:
-                proxy.Add(name,
-                    (Func<Action<dynamic, dynamic>, IDisposable>) (action => proxy.HubProxy.On(name, action)));
-                break;
-            case 3:
-                proxy.Add(name,
-                    (Func<Action<dynamic, dynamic, dynamic>, IDisposable>) (action => proxy.HubProxy.On(name, action)));
-                break;
-            case 4:
-                proxy.Add(name,
-                    (Func<Action<dynamic, dynamic, dynamic, dynamic>, IDisposable>)
-                        (action => proxy.HubProxy.On(name, action)));
-                break;
-            case 5:
-                proxy.Add(name,
-                    (Func<Action<dynamic, dynamic, dynamic, dynamic, dynamic>, IDisposable>)
-                        (action => proxy.HubProxy.On(name, action)));
-                break;
-            case 6:
-                proxy.Add(name,
-                    (Func<Action<dynamic, dynamic, dynamic, dynamic, dynamic, dynamic>, IDisposable>)
-                        (action => proxy.HubProxy.On(name, action)));
-                break;
-            case 7:
-                proxy.Add(name,
-                    (Func<Action<dynamic, dynamic, dynamic, dynamic, dynamic, dynamic, dynamic>, IDisposable>)
-                        (action => proxy.HubProxy.On(name, action)));
-                break;
-            }
+            proxy.Add(name,
+                    (Func<dynamic, IDisposable>)(action => HubProxyExtensions.On(proxy.HubProxy, hubName, action)));
         }
 
         static void MapGenericReturnFunctions(ClientHubProxyBase proxy, MethodInfo method) {
@@ -98,150 +63,113 @@ namespace SignalRNetClientProxyMapper
             var arguments = method.ReturnType.GetGenericArguments();
             var invokeReturnInstance = InvokeReturnMethod.MakeGenericMethod(arguments);
 
-            //Consider having Method Attributes to specify custom name type.
             var name = method.Name;
+            var hubName = GetHubName(method);
 
             switch (method.GetParameters().Length) {
             case 0:
                 proxy.Add(name,
-                    (Func<dynamic>) (() => invokeReturnInstance.Invoke(proxy, new object[] {name, new object[] {}})));
+                    (Func<dynamic>)(() => invokeReturnInstance.Invoke(proxy, new object[] { hubName, new object[] { } })));
                 break;
             case 1:
                 proxy.Add(name,
                     (Func<dynamic, dynamic>)
-                        (arg1 => invokeReturnInstance.Invoke(proxy, new object[] {name, new object[] {arg1}})));
+                        (arg1 => invokeReturnInstance.Invoke(proxy, new object[] { hubName, new object[] { arg1 } })));
                 break;
             case 2:
                 proxy.Add(name,
                     (Func<dynamic, dynamic, dynamic>)
                         ((arg1, arg2) =>
-                            invokeReturnInstance.Invoke(proxy, new object[] {name, new object[] {arg1, arg2}})));
+                            invokeReturnInstance.Invoke(proxy, new object[] { hubName, new object[] { arg1, arg2 } })));
                 break;
             case 3:
                 proxy.Add(name,
                     (Func<dynamic, dynamic, dynamic, dynamic>)
                         ((arg1, arg2, arg3) =>
-                            invokeReturnInstance.Invoke(proxy, new object[] {name, new object[] {arg1, arg2, arg3}})));
+                            invokeReturnInstance.Invoke(proxy, new object[] { hubName, new object[] { arg1, arg2, arg3 } })));
                 break;
             case 4:
                 proxy.Add(name,
                     (Func<dynamic, dynamic, dynamic, dynamic, dynamic>)
                         ((arg1, arg2, arg3, arg4) =>
                             invokeReturnInstance.Invoke(proxy,
-                                new object[] {name, new object[] {arg1, arg2, arg3, arg4}})));
+                                new object[] { hubName, new object[] { arg1, arg2, arg3, arg4 } })));
                 break;
             case 5:
                 proxy.Add(name,
                     (Func<dynamic, dynamic, dynamic, dynamic, dynamic, dynamic>)
                         ((arg1, arg2, arg3, arg4, arg5) =>
                             invokeReturnInstance.Invoke(proxy,
-                                new object[] {name, new object[] {arg1, arg2, arg3, arg4, arg5}})));
+                                new object[] { hubName, new object[] { arg1, arg2, arg3, arg4, arg5 } })));
                 break;
             case 6:
                 proxy.Add(name,
                     (Func<dynamic, dynamic, dynamic, dynamic, dynamic, dynamic, dynamic>)
                         ((arg1, arg2, arg3, arg4, arg5, arg6) =>
                             invokeReturnInstance.Invoke(proxy,
-                                new object[] {name, new object[] {arg1, arg2, arg3, arg4, arg5, arg6}})));
+                                new object[] { hubName, new object[] { arg1, arg2, arg3, arg4, arg5, arg6 } })));
                 break;
             case 7:
                 proxy.Add(name,
                     (Func<dynamic, dynamic, dynamic, dynamic, dynamic, dynamic, dynamic, dynamic>)
                         ((arg1, arg2, arg3, arg4, arg5, arg6, arg7) =>
                             invokeReturnInstance.Invoke(proxy,
-                                new object[] {name, new object[] {arg1, arg2, arg3, arg4, arg5, arg6, arg7}})));
-                break;
-            case 8:
-                proxy.Add(name,
-                    (Func<dynamic, dynamic, dynamic, dynamic, dynamic, dynamic, dynamic, dynamic, dynamic>)
-                        ((arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8) =>
-                            invokeReturnInstance.Invoke(proxy,
-                                new object[] {name, new object[] {arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8}})));
-                break;
-            case 9:
-                proxy.Add(name,
-                    (Func<dynamic, dynamic, dynamic, dynamic, dynamic, dynamic, dynamic, dynamic, dynamic, dynamic>)
-                        ((arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9) =>
-                            invokeReturnInstance.Invoke(proxy,
-                                new object[] {name, new object[] {arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9}})));
-                break;
-            case 10:
-                proxy.Add(name,
-                    (Func<dynamic, dynamic, dynamic, dynamic, dynamic, dynamic, dynamic, dynamic, dynamic, dynamic,
-                        dynamic>)
-                        ((arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10) =>
-                            invokeReturnInstance.Invoke(proxy,
-                                new object[]
-                                {name, new object[] {arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10}})));
+                                new object[] { hubName, new object[] { arg1, arg2, arg3, arg4, arg5, arg6, arg7 } })));
                 break;
             }
+        }
+
+        static string GetHubName(MethodInfo method) {
+            var hubMethodNameAttribute = method.GetCustomAttribute<HubMethodNameAttribute>(false);
+            var hubName = hubMethodNameAttribute != null ? hubMethodNameAttribute.MethodName : method.Name;
+            return hubName;
         }
 
         static void MapReturnFunctions(ClientHubProxyBase proxy, MethodInfo method) {
             Contract.Requires<ArgumentOutOfRangeException>(method.GetParameters().Length <= 10,
                 "The Proxy mapper only supports methods with up to 10 parameters");
 
-            //Consider having Method Attributes to specify custom  name type.
             var name = method.Name;
+            var hubName = GetHubName(method);
 
             switch (method.GetParameters().Length) {
             case 0:
-                proxy.Add(name, (Func<dynamic>) (() => proxy.Invoke(name, new object[] {})));
+                    proxy.Add(name, (Func<dynamic>)(() => proxy.Invoke(hubName, new object[] { })));
                 break;
             case 1:
-                proxy.Add(name, (Func<dynamic, dynamic>) (arg1 => proxy.Invoke(name, new object[] {arg1})));
+                proxy.Add(name, (Func<dynamic, dynamic>)(arg1 => proxy.Invoke(hubName, new object[] { arg1 })));
                 break;
             case 2:
                 proxy.Add(name,
-                    (Func<dynamic, dynamic, dynamic>) ((arg1, arg2) => proxy.Invoke(name, new object[] {arg1, arg2})));
+                    (Func<dynamic, dynamic, dynamic>)((arg1, arg2) => proxy.Invoke(hubName, new object[] { arg1, arg2 })));
                 break;
             case 3:
                 proxy.Add(name,
                     (Func<dynamic, dynamic, dynamic, dynamic>)
-                        ((arg1, arg2, arg3) => proxy.Invoke(name, new object[] {arg1, arg2, arg3})));
+                        ((arg1, arg2, arg3) => proxy.Invoke(hubName, new object[] { arg1, arg2, arg3 })));
                 break;
             case 4:
                 proxy.Add(name,
                     (Func<dynamic, dynamic, dynamic, dynamic, dynamic>)
-                        ((arg1, arg2, arg3, arg4) => proxy.Invoke(name, new object[] {arg1, arg2, arg3, arg4})));
+                        ((arg1, arg2, arg3, arg4) => proxy.Invoke(hubName, new object[] { arg1, arg2, arg3, arg4 })));
                 break;
             case 5:
                 proxy.Add(name,
                     (Func<dynamic, dynamic, dynamic, dynamic, dynamic, dynamic>)
                         ((arg1, arg2, arg3, arg4, arg5) =>
-                            proxy.Invoke(name, new object[] {arg1, arg2, arg3, arg4, arg5})));
+                            proxy.Invoke(hubName, new object[] { arg1, arg2, arg3, arg4, arg5 })));
                 break;
             case 6:
                 proxy.Add(name,
                     (Func<dynamic, dynamic, dynamic, dynamic, dynamic, dynamic, dynamic>)
                         ((arg1, arg2, arg3, arg4, arg5, arg6) =>
-                            proxy.Invoke(name, new object[] {arg1, arg2, arg3, arg4, arg5, arg6})));
+                            proxy.Invoke(hubName, new object[] { arg1, arg2, arg3, arg4, arg5, arg6 })));
                 break;
             case 7:
                 proxy.Add(name,
                     (Func<dynamic, dynamic, dynamic, dynamic, dynamic, dynamic, dynamic, dynamic>)
                         ((arg1, arg2, arg3, arg4, arg5, arg6, arg7) =>
-                            proxy.Invoke(name, new object[] {arg1, arg2, arg3, arg4, arg5, arg6, arg7})));
-                break;
-            case 8:
-                proxy.Add(name,
-                    (Func<dynamic, dynamic, dynamic, dynamic, dynamic, dynamic, dynamic, dynamic, dynamic>)
-                        ((arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8) =>
-                            proxy.Invoke(name, new object[] {arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8})));
-                break;
-            case 9:
-                proxy.Add(name,
-                    (Func<dynamic, dynamic, dynamic, dynamic, dynamic, dynamic, dynamic, dynamic, dynamic, dynamic>)
-                        ((arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9) =>
-                            proxy.Invoke(name, new object[] {arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9})));
-                break;
-            case 10:
-                proxy.Add(name,
-                    (Func<dynamic, dynamic, dynamic, dynamic, dynamic, dynamic, dynamic, dynamic, dynamic, dynamic,
-                        dynamic>)
-                        ((arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10) =>
-                            proxy.Invoke(name,
-                                new object[] {arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10})));
+                            proxy.Invoke(hubName, new object[] { arg1, arg2, arg3, arg4, arg5, arg6, arg7 })));
                 break;
             }
         }
