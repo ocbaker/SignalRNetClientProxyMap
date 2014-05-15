@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2012/06/nuspec.xsd">
     <metadata>
         <id>SignalRNetClientProxyMapper</id>
-        <version>1.0.1</version>
+        <version>1.0.3</version>
         <title>SignalR .Net Client Strong Proxy</title>
         <authors>Oliver C. Baker</authors>
         <licenseUrl>http://opensource.org/licenses/Apache-2.0</licenseUrl>
@@ -18,8 +18,8 @@
             <group targetFramework=".NETFramework4.5">
                 <dependency id="ImpromptuInterface" version="6.2.2" />
                 <dependency id="Microsoft.AspNet.SignalR.Client" version="2.0.3" />
-                <dependency id="Rx-Main" version="2.2.4" />
-                <dependency id="Rx-Linq" version="2.2.4" />
+                <dependency id="Rx-Main" version="2.1.30214.0" />
+                <dependency id="Rx-Linq" version="2.1.30214.0" />
             </group>
         </dependencies>
     </metadata>
