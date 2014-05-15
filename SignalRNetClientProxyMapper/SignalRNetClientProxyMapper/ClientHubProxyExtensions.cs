@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Diagnostics.Contracts;
-using System.Reactive.Linq;
-using System.Reactive.Subjects;
 using System.Reflection;
 using System.Threading.Tasks;
 using ImpromptuInterface;
@@ -13,9 +11,6 @@ namespace SignalRNetClientProxyMapper
     {
         static readonly MethodInfo InvokeReturnMethod = typeof (ClientHubProxyBase).GetMethod("InvokeReturn",
             BindingFlags.NonPublic | BindingFlags.Instance);
-        static readonly MethodInfo CreateObservableHub =
-            typeof (ClientHubProxyExtensions).GetMethod("CreateObservableHubEvent",
-                BindingFlags.NonPublic | BindingFlags.Static);
 
         public static T GetStrongTypedClientProxy<T>(this T @this, IHubProxy hubProxy)
             where T : class, IClientHubProxyBase {
@@ -36,42 +31,64 @@ namespace SignalRNetClientProxyMapper
                     MapReturnFunctions(proxy, method);
                 else if (returnType == typeof (Task<>))
                     MapGenericReturnFunctions(proxy, method);
-                else
-                    throw new ArgumentException("Strong-Typed Methods must return a Task or Task<>", method.Name);
-            }
-
-            foreach (
-                var property in
-                    type.GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly)) {
-                var propertyType = property.PropertyType.IsGenericType
-                    ? property.PropertyType.GetGenericTypeDefinition()
-                    : property.PropertyType;
-                if (propertyType == typeof (IObservable<>))
-                    MapPropertyObservable(proxy, property);
-                    //else if (propertyType == typeof (Lazy<>) &&
-                    //    (property.PropertyType.GetGenericArguments()[0].GetGenericTypeDefinition() ==
-                    //     typeof (IObservable<>)))
-                    //    throw new NotImplementedException();
+                else if (returnType == typeof (IDisposable))
+                    MapEventFunctions(proxy, method);
                 else {
                     throw new ArgumentException(
-                        "Strong-Typed Properties must be an IObservable<>", property.Name);
+                        "Strong-Typed Methods must return a Task or Task<>, Events must return an IDisposable",
+                        method.Name);
                 }
             }
-
 
             return Impromptu.ActLike<T>(proxy);
         }
 
-        static void MapPropertyObservable(ClientHubProxyBase proxy, PropertyInfo property) {
-            var name = property.Name;
-            var instanceMethod = CreateObservableHub.MakeGenericMethod(property.PropertyType.GetGenericArguments()[0]);
-            dynamic observable = instanceMethod.Invoke(null, new object[] {name, proxy.HubProxy});
+        static void MapEventFunctions(ClientHubProxyBase proxy, MethodInfo method) {
+            Contract.Requires<ArgumentOutOfRangeException>(method.GetParameters().Length <= 7,
+                "The Proxy mapper only supports events with up to 7 parameters");
 
-            proxy.Add(name, observable.Observable);
-        }
+            var arguments = method.GetParameters()[0].ParameterType.GenericTypeArguments.Length;
 
-        static ObservableHubEvent<T> CreateObservableHubEvent<T>(string eventName, IHubProxy hubProxy) {
-            return new ObservableHubEvent<T>(eventName, hubProxy);
+            //Consider having Method Attributes to specify custom name type.
+            var name = method.Name;
+
+            switch (arguments) {
+            case 0:
+                proxy.Add(name, (Func<Action, IDisposable>) (action => proxy.HubProxy.On(name, action)));
+                break;
+            case 1:
+                proxy.Add(name,
+                    (Func<Action<dynamic>, IDisposable>) (action => { return proxy.HubProxy.On(name, action); }));
+                break;
+            case 2:
+                proxy.Add(name,
+                    (Func<Action<dynamic, dynamic>, IDisposable>) (action => proxy.HubProxy.On(name, action)));
+                break;
+            case 3:
+                proxy.Add(name,
+                    (Func<Action<dynamic, dynamic, dynamic>, IDisposable>) (action => proxy.HubProxy.On(name, action)));
+                break;
+            case 4:
+                proxy.Add(name,
+                    (Func<Action<dynamic, dynamic, dynamic, dynamic>, IDisposable>)
+                        (action => proxy.HubProxy.On(name, action)));
+                break;
+            case 5:
+                proxy.Add(name,
+                    (Func<Action<dynamic, dynamic, dynamic, dynamic, dynamic>, IDisposable>)
+                        (action => proxy.HubProxy.On(name, action)));
+                break;
+            case 6:
+                proxy.Add(name,
+                    (Func<Action<dynamic, dynamic, dynamic, dynamic, dynamic, dynamic>, IDisposable>)
+                        (action => proxy.HubProxy.On(name, action)));
+                break;
+            case 7:
+                proxy.Add(name,
+                    (Func<Action<dynamic, dynamic, dynamic, dynamic, dynamic, dynamic, dynamic>, IDisposable>)
+                        (action => proxy.HubProxy.On(name, action)));
+                break;
+            }
         }
 
         static void MapGenericReturnFunctions(ClientHubProxyBase proxy, MethodInfo method) {
@@ -228,24 +245,5 @@ namespace SignalRNetClientProxyMapper
                 break;
             }
         }
-    }
-
-    internal sealed class ObservableHubEvent<T>
-    {
-        readonly ISubject<T, T> _observable;
-        IHubProxy _hubProxy;
-
-        internal ObservableHubEvent(string eventName, IHubProxy hubProxy) {
-            _hubProxy = hubProxy;
-
-            var observable = new Subject<T>();
-            _observable = Subject.Synchronize(observable);
-            Observable = _observable.AsObservable();
-
-            hubProxy.On(eventName, x => _observable.OnNext(x));
-        }
-
-        // ReSharper disable once MemberCanBePrivate.Global (Used by dynamic object in ExtensionHelper)
-        internal IObservable<T> Observable { get; private set; }
     }
 }

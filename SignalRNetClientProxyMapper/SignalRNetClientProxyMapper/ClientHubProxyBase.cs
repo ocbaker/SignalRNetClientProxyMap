@@ -5,7 +5,7 @@ using Microsoft.AspNet.SignalR.Client.Hubs;
 
 namespace SignalRNetClientProxyMapper
 {
-    internal class ClientHubProxyBase : ImpromptuDictionary, IClientHubProxyBase
+    class ClientHubProxyBase : ImpromptuDictionary, IClientHubProxyBase
     {
         readonly IHubProxy _hubProxy;
 

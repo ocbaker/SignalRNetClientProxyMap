@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Reactive.Subjects;
 using System.Threading.Tasks;
 using FakeItEasy;
 using FluentAssertions;
@@ -18,28 +17,61 @@ namespace Tests
             _hubProxy = A.Fake<IHubProxy>();
         }
 
-        ITestProxy _testProxy;
         IHubProxy _hubProxy;
+        const ITestProxy TestProxy = null;
 
         [Test]
-        public void CreateProxyTest() {
-            _testProxy = _testProxy.GetStrongTypedClientProxy(_hubProxy);
+        public void CanCallActionsWithNoParameters() {
+            var testProxy = TestProxy.GetStrongTypedClientProxy(_hubProxy);
 
-            _testProxy.ActionWithNoParameters();
-            _testProxy.ActionWithParameter("test");
-            _testProxy.FunctionWithNoParameters();
-            _testProxy.FunctionWithParameter("test");
-
-            _testProxy.ObservedEvent.Subscribe(s => { }, exception => { });
+            testProxy.ActionWithNoParameters();
 
             A.CallTo(() => _hubProxy.Invoke(A<string>.Ignored, A<object[]>.That.IsEmpty()))
                 .MustHaveHappened(Repeated.Exactly.Once);
+        }
+
+        [Test]
+        public void CanCallActionsWithParameters() {
+            var testProxy = TestProxy.GetStrongTypedClientProxy(_hubProxy);
+
+            testProxy.ActionWithParameter("test");
+
             A.CallTo(() => _hubProxy.Invoke(A<string>.Ignored, new object[] {"test"}))
                 .MustHaveHappened(Repeated.Exactly.Once);
+        }
+
+        [Test]
+        public void CanCallFunctionsWithNoParameters() {
+            var testProxy = TestProxy.GetStrongTypedClientProxy(_hubProxy);
+
+            testProxy.FunctionWithNoParameters();
+
             A.CallTo(() => _hubProxy.Invoke<string>(A<string>.Ignored, A<object[]>.That.IsEmpty()))
                 .MustHaveHappened(Repeated.Exactly.Once);
+        }
+
+        [Test]
+        public void CanCallFunctionsWithParameters() {
+            var testProxy = TestProxy.GetStrongTypedClientProxy(_hubProxy);
+
+            testProxy.FunctionWithParameter("test");
+
             A.CallTo(() => _hubProxy.Invoke<string>(A<string>.Ignored, new object[] {"test"}))
                 .MustHaveHappened(Repeated.Exactly.Once);
+        }
+
+        [Test]
+        public void CanSubscribeToEventWithNoParameters() {
+            var testProxy = TestProxy.GetStrongTypedClientProxy(_hubProxy);
+
+            testProxy.subscribableEventWithNoParameters(() => { });
+        }
+
+        [Test]
+        public void CanSubscribeToEventWithParameters() {
+            var testProxy = TestProxy.GetStrongTypedClientProxy(_hubProxy);
+
+            testProxy.subscribableEventWithParameter(paramter => { });
         }
 
         [Test]
@@ -63,6 +95,7 @@ namespace Tests
     public class FailingClass : IEmptyProxy
     {
         public FailingClass(IHubProxy hubProxy) {}
+
         public Task Invoke(string method, params object[] args) {
             throw new NotImplementedException();
         }
@@ -83,7 +116,10 @@ namespace Tests
 
     public interface ITestProxy : IClientHubProxyBase
     {
-        IObservable<string> ObservedEvent { get; set; }
+        //IObservable<string> ObservedEvent { get; set; }
+        IDisposable subscribableEventWithNoParameters(Action action);
+        IDisposable subscribableEventWithParameter(Action<string> action);
+
         Task ActionWithNoParameters();
         Task ActionWithParameter(string message);
         Task<string> FunctionWithNoParameters();
