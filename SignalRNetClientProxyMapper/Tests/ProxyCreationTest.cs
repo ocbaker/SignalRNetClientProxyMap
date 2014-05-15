@@ -1,8 +1,10 @@
 ﻿using System;
+using System.Reactive.Subjects;
 using System.Threading.Tasks;
 using FakeItEasy;
 using FluentAssertions;
 using Microsoft.AspNet.SignalR.Client;
+using Microsoft.AspNet.SignalR.Client.Hubs;
 using NUnit.Framework;
 using SignalRNetClientProxyMapper;
 
@@ -27,6 +29,8 @@ namespace Tests
             _testProxy.ActionWithParameter("test");
             _testProxy.FunctionWithNoParameters();
             _testProxy.FunctionWithParameter("test");
+
+            _testProxy.ObservedEvent.Subscribe(s => { }, exception => { });
 
             A.CallTo(() => _hubProxy.Invoke(A<string>.Ignored, A<object[]>.That.IsEmpty()))
                 .MustHaveHappened(Repeated.Exactly.Once);
@@ -56,9 +60,20 @@ namespace Tests
     public interface IEmptyProxy : IClientHubProxyBase {}
 
 
-    public class FailingClass : ClientHubProxyBase, IEmptyProxy
+    public class FailingClass : IEmptyProxy
     {
-        public FailingClass(IHubProxy hubProxy) : base(hubProxy) {}
+        public FailingClass(IHubProxy hubProxy) {}
+        public Task Invoke(string method, params object[] args) {
+            throw new NotImplementedException();
+        }
+
+        public Task<T> Invoke<T>(string method, params object[] args) {
+            throw new NotImplementedException();
+        }
+
+        public Subscription Subscribe(string eventName) {
+            throw new NotImplementedException();
+        }
     }
 
     public interface IFailingProxywithInvalidMethodSignature : IClientHubProxyBase
@@ -68,6 +83,7 @@ namespace Tests
 
     public interface ITestProxy : IClientHubProxyBase
     {
+        IObservable<string> ObservedEvent { get; set; }
         Task ActionWithNoParameters();
         Task ActionWithParameter(string message);
         Task<string> FunctionWithNoParameters();

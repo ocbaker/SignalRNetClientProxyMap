@@ -15,7 +15,7 @@ namespace SignalRNetClientProxyMapper
         /// <param name="method">The name of the method.</param>
         /// <param name="args">The arguments</param>
         /// <returns>A task that represents when invocation returned.</returns>
-        [Obsolete("You should define the function you wish to call inside your interface strongly.")]
+        [Obsolete("You should define the function you wish to call inside your interface strongly. (Task NameOfAction(...))")]
         Task Invoke(string method, params object[] args);
 
         /// <summary>
@@ -25,7 +25,7 @@ namespace SignalRNetClientProxyMapper
         /// <param name="method">The name of the method.</param>
         /// <param name="args">The arguments</param>
         /// <returns>A task that represents when invocation returned.</returns>
-        [Obsolete("You should define the function you wish to call inside your interface strongly.")]
+        [Obsolete("You should define the function you wish to call inside your interface strongly. (Task<TReturn> NameOfFunction(...))")]
         Task<T> Invoke<T>(string method, params object[] args);
 
         /// <summary>
@@ -34,6 +34,7 @@ namespace SignalRNetClientProxyMapper
         /// <param name="eventName">The name of the event</param>
         /// <returns>A Microsoft.AspNet.SignalR.Client.Hubs.Subscription.</returns>
         /// <remarks>Subscriptions are not yet supported by the proxy interface and must be done manually.</remarks>
+        [Obsolete("You should define the event you wish to observe inside your interface strongly. (IObservable<TReturn> NameOfEvent {get;})")]
         Subscription Subscribe(string eventName);
     }
 }

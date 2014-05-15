@@ -5,12 +5,16 @@ using Microsoft.AspNet.SignalR.Client.Hubs;
 
 namespace SignalRNetClientProxyMapper
 {
-    public class ClientHubProxyBase : ImpromptuDictionary, IClientHubProxyBase
+    internal class ClientHubProxyBase : ImpromptuDictionary, IClientHubProxyBase
     {
         readonly IHubProxy _hubProxy;
 
-        public ClientHubProxyBase(IHubProxy hubProxy) {
+        internal ClientHubProxyBase(IHubProxy hubProxy) {
             _hubProxy = hubProxy;
+        }
+
+        internal IHubProxy HubProxy {
+            get { return _hubProxy; }
         }
 
         public Task Invoke(string method, params object[] args) {
