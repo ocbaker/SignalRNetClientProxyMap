@@ -1,33 +1,34 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-
 <package xmlns="http://schemas.microsoft.com/packaging/2012/06/nuspec.xsd">
-  <metadata>
-    <id>SignalRNetClientProxyMapper</id>
-    <version>1.0.0</version>
-    <title>SignalRNetClientProxyMapper</title>
-    <authors>Oliver C. Baker</authors>
-    <licenseUrl>http://opensource.org/licenses/Apache-2.0</licenseUrl>
-    <projectUrl>https://nuget.org/packages/NuGet.Packager</projectUrl>
-    <iconUrl>https://nuget.org/Content/Images/packageDefaultIcon-50x50.png</iconUrl>
-    <requireLicenseAcceptance>false</requireLicenseAcceptance>
-    <description>Enables you to create Strong Typed Interfaces for SignalR Hubs on a .NET Client</description>
-    <summary>Enables you to create Strong Typed Interfaces for SignalR Hubs on a .NET Client</summary>
-    <releaseNotes />
-    <copyright>Copyright Oliver C. Baker 2014</copyright>
-    <language>en-US</language>
-    <dependencies>
-      <group targetFramework=".NETFramework4.5">
-        <dependency id="ImpromptuInterface" version="6.2.2" />
-        <dependency id="Microsoft.AspNet.SignalR.Client" version="2.0.3" />
-      </group>
-    </dependencies>
-  </metadata>
-  <files>
-    <file src="content\_._" target="content\_._" />
-    <file src="lib\SignalRNetClientProxyMapper.dll" target="lib\SignalRNetClientProxyMapper.dll" />
-    <file src="lib\SignalRNetClientProxyMapper.xml" target="lib\SignalRNetClientProxyMapper.xml" />
-    <file src="tools\init.ps1" target="tools\init.ps1" />
-    <file src="tools\install.ps1" target="tools\install.ps1" />
-    <file src="tools\uninstall.ps1" target="tools\uninstall.ps1" />
-  </files>
+    <metadata>
+        <id>SignalRNetClientProxyMapper</id>
+        <version>1.0.1</version>
+        <title>SignalR .Net Client Strong Proxy</title>
+        <authors>Oliver C. Baker</authors>
+        <licenseUrl>http://opensource.org/licenses/Apache-2.0</licenseUrl>
+        <projectUrl>https://github.com/ocbaker/SignalRNetClientProxyMap</projectUrl>
+        <iconUrl>https://nuget.org/Content/Images/packageDefaultIcon-50x50.png</iconUrl>
+        <requireLicenseAcceptance>false</requireLicenseAcceptance>
+        <description>Enables you to create Strong Typed Interfaces for SignalR Hubs on a .NET Client</description>
+        <summary>Enables you to create Strong Typed Interfaces for SignalR Hubs on a .NET Client</summary>
+        <releaseNotes>Added the Ability to Observe for events.</releaseNotes>
+        <copyright>Copyright Oliver C. Baker 2014</copyright>
+        <language>en-US</language>
+        <dependencies>
+            <group targetFramework=".NETFramework4.5">
+                <dependency id="ImpromptuInterface" version="6.2.2" />
+                <dependency id="Microsoft.AspNet.SignalR.Client" version="2.0.3" />
+                <dependency id="Rx-Main" version="2.2.4" />
+                <dependency id="Rx-Linq" version="2.2.4" />
+            </group>
+        </dependencies>
+    </metadata>
+    <files>
+        <file src="content\_._" target="content\_._" />
+        <file src="lib\SignalRNetClientProxyMapper.dll" target="lib\SignalRNetClientProxyMapper.dll" />
+        <file src="lib\SignalRNetClientProxyMapper.xml" target="lib\SignalRNetClientProxyMapper.xml" />
+        <file src="tools\init.ps1" target="tools\init.ps1" />
+        <file src="tools\install.ps1" target="tools\install.ps1" />
+        <file src="tools\uninstall.ps1" target="tools\uninstall.ps1" />
+    </files>
 </package>

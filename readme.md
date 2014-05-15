@@ -1,1 +1,1 @@
-This library provides the ability to have Strong Typed Interfaces representing a SignalR Hub in your .Net Client, a bit like Javascript.
+Read the wiki for more information: https://github.com/ocbaker/SignalRNetClientProxyMap/wiki
