@@ -124,6 +124,7 @@
     <Compile Include="ClientHubProxyBase.cs" />
     <Compile Include="ClientHubProxyExtensions.cs" />
     <Compile Include="HubMethodNameAttribute.cs" />
+    <Compile Include="HubNameAttribute.cs" />
     <Compile Include="IClientHubProxyBase.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
