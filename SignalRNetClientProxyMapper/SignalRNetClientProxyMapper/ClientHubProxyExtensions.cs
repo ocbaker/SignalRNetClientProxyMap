@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Diagnostics.Contracts;
 using System.Reflection;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using ImpromptuInterface;
 using Microsoft.AspNet.SignalR.Client;
@@ -11,7 +12,18 @@ namespace SignalRNetClientProxyMapper
     {
         static readonly MethodInfo InvokeReturnMethod = typeof (ClientHubProxyBase).GetMethod("InvokeReturn",
             BindingFlags.NonPublic | BindingFlags.Instance);
+        const string HasInterfaceITest = "/^[I]{1}[[:upper:]]+/";
 
+
+        public static T CreateStrongHubProxy<T>(this HubConnection @this, bool dropInterfaceI = true)
+            where T : class, IClientHubProxyBase
+        {
+            Contract.Requires<InvalidCastException>(typeof(T).IsInterface, "The Proxy Type must be an Interface");
+
+            return default(T).GetStrongTypedClientProxy(@this.CreateHubProxy(GetHubName<T>(dropInterfaceI)));
+        }
+
+        
         public static T GetStrongTypedClientProxy<T>(this T @this, IHubProxy hubProxy)
             where T : class, IClientHubProxyBase {
             Contract.Requires<InvalidCastException>(typeof (T).IsInterface, "The Proxy Type must be an Interface");
@@ -50,7 +62,7 @@ namespace SignalRNetClientProxyMapper
             var arguments = method.GetParameters()[0].ParameterType.GenericTypeArguments.Length;
 
             var name = method.Name;
-            var hubName = GetHubName(method);
+            var hubName = GetHubMethodName(method);
 
             proxy.Add(name,
                     (Func<dynamic, IDisposable>)(action => HubProxyExtensions.On(proxy.HubProxy, hubName, action)));
@@ -64,7 +76,7 @@ namespace SignalRNetClientProxyMapper
             var invokeReturnInstance = InvokeReturnMethod.MakeGenericMethod(arguments);
 
             var name = method.Name;
-            var hubName = GetHubName(method);
+            var hubName = GetHubMethodName(method);
 
             switch (method.GetParameters().Length) {
             case 0:
@@ -119,10 +131,14 @@ namespace SignalRNetClientProxyMapper
             }
         }
 
-        static string GetHubName(MethodInfo method) {
+        static string GetHubMethodName(MethodInfo method) {
             var hubMethodNameAttribute = method.GetCustomAttribute<HubMethodNameAttribute>(false);
-            var hubName = hubMethodNameAttribute != null ? hubMethodNameAttribute.MethodName : method.Name;
-            return hubName;
+            return hubMethodNameAttribute != null ? hubMethodNameAttribute.MethodName : method.Name;
+        }
+
+        static string GetHubName<T>(bool dropInterfaceI = true) {
+            var hubMethodNameAttribute = typeof(T).GetCustomAttribute<HubNameAttribute>(false);
+            return hubMethodNameAttribute != null ? hubMethodNameAttribute.HubName : ((dropInterfaceI && Regex.IsMatch(typeof(T).Name, HasInterfaceITest)) ? typeof(T).Name.Remove(0, 1) : typeof(T).Name);
         }
 
         static void MapReturnFunctions(ClientHubProxyBase proxy, MethodInfo method) {
@@ -130,7 +146,7 @@ namespace SignalRNetClientProxyMapper
                 "The Proxy mapper only supports methods with up to 10 parameters");
 
             var name = method.Name;
-            var hubName = GetHubName(method);
+            var hubName = GetHubMethodName(method);
 
             switch (method.GetParameters().Length) {
             case 0:
