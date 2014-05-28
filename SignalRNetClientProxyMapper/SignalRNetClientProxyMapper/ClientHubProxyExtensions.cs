@@ -8,13 +8,22 @@ using Microsoft.AspNet.SignalR.Client;
 
 namespace SignalRNetClientProxyMapper
 {
+    /// <summary>
+    /// Contains extension methods for creating a strong client proxy
+    /// </summary>
     public static class ClientHubProxyExtensions
     {
         static readonly MethodInfo InvokeReturnMethod = typeof (ClientHubProxyBase).GetMethod("InvokeReturn",
             BindingFlags.NonPublic | BindingFlags.Instance);
         const string HasInterfaceITest = "/^[I]{1}[[:upper:]]+/";
 
-
+        /// <summary>
+        /// Creates a strong proxy from the defenition of an interface
+        /// </summary>
+        /// <typeparam name="T">The interface to create the proxy from</typeparam>
+        /// <param name="this">The HubConnection to attach the proxy to</param>
+        /// <param name="dropInterfaceI">If the prxy is named with IInterface, drop the I from the mapped name if true, otherwise leave it in.</param>
+        /// <returns>An Interface of type T which represents the HubProxy</returns>
         public static T CreateStrongHubProxy<T>(this HubConnection @this, bool dropInterfaceI = true)
             where T : class, IClientHubProxyBase
         {
@@ -23,7 +32,13 @@ namespace SignalRNetClientProxyMapper
             return default(T).GetStrongTypedClientProxy(@this.CreateHubProxy(GetHubName<T>(dropInterfaceI)));
         }
 
-        
+        /// <summary>
+        /// Creates a strong proxy from the defenition of an interface
+        /// </summary>
+        /// <typeparam name="T">The interface to create the proxy from</typeparam>
+        /// <param name="this">The interface to create the proxy from</param>
+        /// <param name="hubProxy">The hubproxy to create the strong interface from</param>
+        /// <returns>An Interface of type T which represents the HubProxy</returns>
         public static T GetStrongTypedClientProxy<T>(this T @this, IHubProxy hubProxy)
             where T : class, IClientHubProxyBase {
             Contract.Requires<InvalidCastException>(typeof (T).IsInterface, "The Proxy Type must be an Interface");
