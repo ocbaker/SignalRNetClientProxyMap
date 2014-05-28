@@ -110,11 +110,19 @@ namespace Tests
         }
 
         [Test]
-        public void ShouldFailIfNonTasksInProxy() {
-            IFailingProxywithInvalidMethodSignature testProxy = null;
+        public void ShouldFailBecauseNonTasksInProxy() {
+            IFailingProxyWithInvalidMethodSignature testProxy = null;
 
             testProxy.Invoking(x => x = x.GetStrongTypedClientProxy(_hubProxy))
                 .ShouldThrow<ArgumentException>("Proxy should never accept anything other than Task & Task<T>");
+        }
+
+        [Test]
+        public void ShouldFailBecauseOverloadsNotSupported() {
+            IFailingProxyWithOverloadingMethod testProxy = null;
+
+            testProxy.Invoking(x => x = x.GetStrongTypedClientProxy(_hubProxy))
+                .ShouldThrow<NotSupportedException>("Proxy do not currently support Overloading Methods");
         }
 
         [Test]
@@ -145,9 +153,15 @@ namespace Tests
         }
     }
 
-    public interface IFailingProxywithInvalidMethodSignature : IClientHubProxyBase
+    public interface IFailingProxyWithInvalidMethodSignature : IClientHubProxyBase
     {
         void ActionWithVoidReturn();
+    }
+
+    public interface IFailingProxyWithOverloadingMethod : IClientHubProxyBase
+    {
+        Task ActionWithVoidReturn();
+        Task ActionWithVoidReturn(object variable);
     }
 
     public interface ITestProxy : IClientHubProxyBase

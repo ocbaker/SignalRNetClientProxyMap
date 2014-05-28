@@ -64,6 +64,9 @@ namespace SignalRNetClientProxyMapper
             var name = method.Name;
             var hubName = GetHubMethodName(method);
 
+            if (proxy.ContainsKey(name))
+                throw new NotSupportedException("Overloading is not supported");
+
             proxy.Add(name,
                     (Func<dynamic, IDisposable>)(action => HubProxyExtensions.On(proxy.HubProxy, hubName, action)));
         }
@@ -77,6 +80,9 @@ namespace SignalRNetClientProxyMapper
 
             var name = method.Name;
             var hubName = GetHubMethodName(method);
+
+            if(proxy.ContainsKey(name))
+                throw new NotSupportedException("Overloading is not supported");
 
             switch (method.GetParameters().Length) {
             case 0:
@@ -147,6 +153,9 @@ namespace SignalRNetClientProxyMapper
 
             var name = method.Name;
             var hubName = GetHubMethodName(method);
+
+            if (proxy.ContainsKey(name))
+                throw new NotSupportedException("Overloading is not supported");
 
             switch (method.GetParameters().Length) {
             case 0:
