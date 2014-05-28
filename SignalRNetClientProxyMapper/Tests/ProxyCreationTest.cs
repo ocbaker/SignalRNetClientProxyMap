@@ -15,10 +15,12 @@ namespace Tests
         [SetUp]
         public void SetUp() {
             _hubProxy = A.Fake<IHubProxy>();
+            _hubConnection = A.Fake<HubConnection>();
         }
 
         IHubProxy _hubProxy;
         const ITestProxy TestProxy = null;
+        HubConnection _hubConnection = null;
 
         [Test]
         public void CanCallActionsWithNoParameters() {
@@ -113,6 +115,13 @@ namespace Tests
 
             testProxy.Invoking(x => x = x.GetStrongTypedClientProxy(_hubProxy))
                 .ShouldThrow<ArgumentException>("Proxy should never accept anything other than Task & Task<T>");
+        }
+
+        [Test]
+        public void CreateProxyFromConnection() {
+            var testProxy = _hubConnection.CreateStrongHubProxy<ITestProxy>();
+
+            testProxy.ActionWithNoParameters();
         }
     }
 
