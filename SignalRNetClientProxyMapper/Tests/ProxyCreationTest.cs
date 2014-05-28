@@ -131,6 +131,27 @@ namespace Tests
 
             testProxy.ActionWithNoParameters();
         }
+
+        [Test]
+        public void GetHubNameStripsI() {
+            ClientHubProxyExtensions.GetHubName<ITestProxy>().Should().Be("TestProxy", "ITestProxy Starts with the Interface Convention 'I' and should be dropped by default");
+        }
+
+        [Test]
+        public void GetHubNameDesNotStripI() {
+            ClientHubProxyExtensions.GetHubName<ITestProxy>(dropInterfaceI: false)
+                .Should()
+                .Be("ITestProxy",
+                    "ITestProxy starts with the interface  convention 'I' and should not be dropped when dropInterfaceI = false");
+        }
+
+        [Test]
+        public void GetHubNameWithAttributeGetsAttributeName() {
+            ClientHubProxyExtensions.GetHubName<ITestProxyWithAttributeHubName>()
+                .Should()
+                .Be("TestProxy",
+                    "When the HubName Attribute is defined the Hubs Internal name should be derived from that Attribute.");
+        }
     }
 
     public interface IEmptyProxy : IClientHubProxyBase {}
@@ -162,6 +183,12 @@ namespace Tests
     {
         Task ActionWithVoidReturn();
         Task ActionWithVoidReturn(object variable);
+    }
+
+    [HubName("TestProxy")]
+    public interface ITestProxyWithAttributeHubName : IClientHubProxyBase
+    {
+        
     }
 
     public interface ITestProxy : IClientHubProxyBase

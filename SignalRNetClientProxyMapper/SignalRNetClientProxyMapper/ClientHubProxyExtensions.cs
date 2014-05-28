@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Diagnostics.Contracts;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using ImpromptuInterface;
@@ -15,7 +16,7 @@ namespace SignalRNetClientProxyMapper
     {
         static readonly MethodInfo InvokeReturnMethod = typeof (ClientHubProxyBase).GetMethod("InvokeReturn",
             BindingFlags.NonPublic | BindingFlags.Instance);
-        const string HasInterfaceITest = "/^[I]{1}[[:upper:]]+/";
+        const string HasInterfaceITest = "^[I]{1}[A-Z]{1}";
 
         /// <summary>
         /// Creates a strong proxy from the defenition of an interface
@@ -70,7 +71,7 @@ namespace SignalRNetClientProxyMapper
             return Impromptu.ActLike<T>(proxy);
         }
 
-        static void MapEventFunctions(ClientHubProxyBase proxy, MethodInfo method) {
+        internal static void MapEventFunctions(ClientHubProxyBase proxy, MethodInfo method) {
             Contract.Requires<ArgumentOutOfRangeException>(method.GetParameters().Length <= 7,
                 "The Proxy mapper only supports events with up to 7 parameters");
 
@@ -86,7 +87,7 @@ namespace SignalRNetClientProxyMapper
                     (Func<dynamic, IDisposable>)(action => HubProxyExtensions.On(proxy.HubProxy, hubName, action)));
         }
 
-        static void MapGenericReturnFunctions(ClientHubProxyBase proxy, MethodInfo method) {
+        internal static void MapGenericReturnFunctions(ClientHubProxyBase proxy, MethodInfo method) {
             Contract.Requires<ArgumentOutOfRangeException>(method.GetParameters().Length <= 10,
                 "The Proxy mapper only supports methods with up to 10 parameters");
 
@@ -152,17 +153,18 @@ namespace SignalRNetClientProxyMapper
             }
         }
 
-        static string GetHubMethodName(MethodInfo method) {
+        internal static string GetHubMethodName(MethodInfo method) {
             var hubMethodNameAttribute = method.GetCustomAttribute<HubMethodNameAttribute>(false);
             return hubMethodNameAttribute != null ? hubMethodNameAttribute.MethodName : method.Name;
         }
 
-        static string GetHubName<T>(bool dropInterfaceI = true) {
+        internal static string GetHubName<T>(bool dropInterfaceI = true) {
             var hubMethodNameAttribute = typeof(T).GetCustomAttribute<HubNameAttribute>(false);
+
             return hubMethodNameAttribute != null ? hubMethodNameAttribute.HubName : ((dropInterfaceI && Regex.IsMatch(typeof(T).Name, HasInterfaceITest)) ? typeof(T).Name.Remove(0, 1) : typeof(T).Name);
         }
 
-        static void MapReturnFunctions(ClientHubProxyBase proxy, MethodInfo method) {
+        internal static void MapReturnFunctions(ClientHubProxyBase proxy, MethodInfo method) {
             Contract.Requires<ArgumentOutOfRangeException>(method.GetParameters().Length <= 10,
                 "The Proxy mapper only supports methods with up to 10 parameters");
 
