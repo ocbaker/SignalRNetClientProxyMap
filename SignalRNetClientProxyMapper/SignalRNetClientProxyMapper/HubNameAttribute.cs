@@ -6,7 +6,7 @@ namespace SignalRNetClientProxyMapper
     ///     Enables you to define an alternative server-side name mapping for a hub
     /// </summary>
     [AttributeUsage(AttributeTargets.Interface, AllowMultiple = false, Inherited = false)]
-    public class HubNameAttribute : Attribute
+    public sealed class HubNameAttribute : Attribute
     {
         readonly string _hubName;
 
