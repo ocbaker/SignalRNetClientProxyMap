@@ -20,13 +20,23 @@ namespace Tests
 
         IHubProxy _hubProxy;
         const ITestProxy TestProxy = null;
-        HubConnection _hubConnection = null;
+        HubConnection _hubConnection;
 
         [Test]
         public void CanCallActionsWithNoParameters() {
             var testProxy = TestProxy.GetStrongTypedClientProxy(_hubProxy);
 
             testProxy.ActionWithNoParameters();
+
+            A.CallTo(() => _hubProxy.Invoke(A<string>.Ignored, A<object[]>.That.IsEmpty()))
+                .MustHaveHappened(Repeated.Exactly.Once);
+        }
+
+        [Test]
+        public void CanCallActionsWithNoParametersAndAlternativeName() {
+            var testProxy = TestProxy.GetStrongTypedClientProxy(_hubProxy);
+
+            testProxy.ActionWithNoParametersAndAlternativeName();
 
             A.CallTo(() => _hubProxy.Invoke(A<string>.Ignored, A<object[]>.That.IsEmpty()))
                 .MustHaveHappened(Repeated.Exactly.Once);
@@ -43,20 +53,20 @@ namespace Tests
         }
 
         [Test]
-        public void CanCallActionsWithNoParametersAndAlternativeName() {
-            var testProxy = TestProxy.GetStrongTypedClientProxy(_hubProxy);
-
-            testProxy.ActionWithNoParametersAndAlternativeName();
-
-            A.CallTo(() => _hubProxy.Invoke(A<string>.Ignored, A<object[]>.That.IsEmpty()))
-                .MustHaveHappened(Repeated.Exactly.Once);
-        }
-
-        [Test]
         public void CanCallFunctionsWithNoParameters() {
             var testProxy = TestProxy.GetStrongTypedClientProxy(_hubProxy);
 
             testProxy.FunctionWithNoParameters();
+
+            A.CallTo(() => _hubProxy.Invoke<string>(A<string>.Ignored, A<object[]>.That.IsEmpty()))
+                .MustHaveHappened(Repeated.Exactly.Once);
+        }
+
+        [Test]
+        public void CanCallFunctionsWithNoParametersAndAlternativeName() {
+            var testProxy = TestProxy.GetStrongTypedClientProxy(_hubProxy);
+
+            testProxy.FunctionWithNoParametersAndAlternativeName();
 
             A.CallTo(() => _hubProxy.Invoke<string>(A<string>.Ignored, A<object[]>.That.IsEmpty()))
                 .MustHaveHappened(Repeated.Exactly.Once);
@@ -73,27 +83,10 @@ namespace Tests
         }
 
         [Test]
-        public void CanCallFunctionsWithNoParametersAndAlternativeName() {
-            var testProxy = TestProxy.GetStrongTypedClientProxy(_hubProxy);
-
-            testProxy.FunctionWithNoParametersAndAlternativeName();
-
-            A.CallTo(() => _hubProxy.Invoke<string>(A<string>.Ignored, A<object[]>.That.IsEmpty()))
-                .MustHaveHappened(Repeated.Exactly.Once);
-        }
-
-        [Test]
         public void CanSubscribeToEventWithNoParameters() {
             var testProxy = TestProxy.GetStrongTypedClientProxy(_hubProxy);
 
             testProxy.subscribableEventWithNoParameters(() => { });
-        }
-
-        [Test]
-        public void CanSubscribeToEventWithParameters() {
-            var testProxy = TestProxy.GetStrongTypedClientProxy(_hubProxy);
-
-            testProxy.subscribableEventWithParameter(paramter => { });
         }
 
         [Test]
@@ -104,9 +97,40 @@ namespace Tests
         }
 
         [Test]
-        public void ShouldFailBecuaseOnlyInterfacesAccepted() {
-            var test = new FailingClass(_hubProxy);
-            test.Invoking(x => x.GetStrongTypedClientProxy(_hubProxy)).ShouldThrow<InvalidCastException>();
+        public void CanSubscribeToEventWithParameters() {
+            var testProxy = TestProxy.GetStrongTypedClientProxy(_hubProxy);
+
+            testProxy.subscribableEventWithParameter(paramter => { });
+        }
+
+        [Test]
+        public void CreateProxyFromConnection() {
+            var testProxy = _hubConnection.CreateStrongHubProxy<ITestProxy>();
+
+            testProxy.ActionWithNoParameters();
+        }
+
+        [Test]
+        public void GetHubNameDesNotStripI() {
+            ClientHubProxyExtensions.GetHubName<ITestProxy>(false)
+                .Should()
+                .Be("ITestProxy",
+                    "ITestProxy starts with the interface  convention 'I' and should not be dropped when dropInterfaceI = false");
+        }
+
+        [Test]
+        public void GetHubNameStripsI() {
+            ClientHubProxyExtensions.GetHubName<ITestProxy>()
+                .Should()
+                .Be("TestProxy", "ITestProxy Starts with the Interface Convention 'I' and should be dropped by default");
+        }
+
+        [Test]
+        public void GetHubNameWithAttributeGetsAttributeName() {
+            ClientHubProxyExtensions.GetHubName<ITestProxyWithAttributeHubName>()
+                .Should()
+                .Be("TestProxy",
+                    "When the HubName Attribute is defined the Hubs Internal name should be derived from that Attribute.");
         }
 
         [Test]
@@ -126,31 +150,9 @@ namespace Tests
         }
 
         [Test]
-        public void CreateProxyFromConnection() {
-            var testProxy = _hubConnection.CreateStrongHubProxy<ITestProxy>();
-
-            testProxy.ActionWithNoParameters();
-        }
-
-        [Test]
-        public void GetHubNameStripsI() {
-            ClientHubProxyExtensions.GetHubName<ITestProxy>().Should().Be("TestProxy", "ITestProxy Starts with the Interface Convention 'I' and should be dropped by default");
-        }
-
-        [Test]
-        public void GetHubNameDesNotStripI() {
-            ClientHubProxyExtensions.GetHubName<ITestProxy>(dropInterfaceI: false)
-                .Should()
-                .Be("ITestProxy",
-                    "ITestProxy starts with the interface  convention 'I' and should not be dropped when dropInterfaceI = false");
-        }
-
-        [Test]
-        public void GetHubNameWithAttributeGetsAttributeName() {
-            ClientHubProxyExtensions.GetHubName<ITestProxyWithAttributeHubName>()
-                .Should()
-                .Be("TestProxy",
-                    "When the HubName Attribute is defined the Hubs Internal name should be derived from that Attribute.");
+        public void ShouldFailBecuaseOnlyInterfacesAccepted() {
+            var test = new FailingClass(_hubProxy);
+            test.Invoking(x => x.GetStrongTypedClientProxy(_hubProxy)).ShouldThrow<InvalidCastException>();
         }
     }
 
@@ -186,26 +188,26 @@ namespace Tests
     }
 
     [HubName("TestProxy")]
-    public interface ITestProxyWithAttributeHubName : IClientHubProxyBase
-    {
-        
-    }
+    public interface ITestProxyWithAttributeHubName : IClientHubProxyBase {}
 
     public interface ITestProxy : IClientHubProxyBase
     {
         //IObservable<string> ObservedEvent { get; set; }
         IDisposable subscribableEventWithNoParameters(Action action);
         IDisposable subscribableEventWithParameter(Action<string> action);
+
         [HubMethodName("AlternativeName")]
         IDisposable subscribableEventWithNoParametersAndAlternativeName(Action action);
 
         Task ActionWithNoParameters();
         Task ActionWithParameter(string message);
+
         [HubMethodName("AlternativeName")]
         Task ActionWithNoParametersAndAlternativeName();
 
         Task<string> FunctionWithNoParameters();
         Task<string> FunctionWithParameter(string message);
+
         [HubMethodName("AlternativeName")]
         Task<string> FunctionWithNoParametersAndAlternativeName();
     }
