@@ -17,7 +17,7 @@ namespace SignalRNetClientProxyMapper
     {
         static readonly MethodInfo InvokeReturnMethod = typeof (ClientHubProxyBase).GetMethod("InvokeReturn",
             BindingFlags.NonPublic | BindingFlags.Instance);
-        const string HasInterfaceITest = "^[I]{1}[A-Z]{1}";
+        static readonly Regex HasInterfaceITest = new Regex("^[I]{1}[A-Z]{1}", RegexOptions.Compiled);
 
         /// <summary>
         /// Creates a strong proxy from the defenition of an interface
@@ -186,7 +186,7 @@ namespace SignalRNetClientProxyMapper
         internal static string GetHubName<T>(bool dropInterfaceI = true) {
             var hubMethodNameAttribute = typeof(T).GetCustomAttribute<HubNameAttribute>(false);
 
-            return hubMethodNameAttribute != null ? hubMethodNameAttribute.HubName : ((dropInterfaceI && Regex.IsMatch(typeof(T).Name, HasInterfaceITest)) ? typeof(T).Name.Remove(0, 1) : typeof(T).Name);
+            return hubMethodNameAttribute != null ? hubMethodNameAttribute.HubName : ((dropInterfaceI && HasInterfaceITest.IsMatch(typeof(T).Name)) ? typeof(T).Name.Remove(0, 1) : typeof(T).Name);
         }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Maintainability", "CA1502:AvoidExcessiveComplexity", Justification = "SignalR has built-in limitations we must comply with.")]
