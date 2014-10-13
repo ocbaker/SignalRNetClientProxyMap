@@ -104,8 +104,6 @@ namespace SignalRNetClientProxyMapper
             Contract.Requires<ArgumentOutOfRangeException>(method.GetParameters().Length <= 7,
                 "The Proxy mapper only supports events with up to 7 parameters");
 
-            var arguments = method.GetParameters()[0].ParameterType.GenericTypeArguments.Length;
-
             var name = method.Name;
             var hubName = GetHubMethodName(method);
 

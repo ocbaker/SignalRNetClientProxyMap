@@ -87,6 +87,9 @@ namespace Tests
             var testProxy = TestProxy.GetStrongTypedClientProxy(_hubProxy);
 
             testProxy.subscribableEventWithNoParameters(() => { });
+
+            A.CallTo(() => _hubProxy.Subscribe("subscribableEventWithNoParameters"))
+                .MustHaveHappened(Repeated.Exactly.Once);
         }
 
         [Test]
@@ -94,6 +97,9 @@ namespace Tests
             var testProxy = TestProxy.GetStrongTypedClientProxy(_hubProxy);
 
             testProxy.subscribableEventWithNoParametersAndAlternativeName(() => { });
+
+            A.CallTo(() => _hubProxy.Subscribe("AlternativeName"))
+                .MustHaveHappened(Repeated.Exactly.Once);
         }
 
         [Test]
@@ -101,6 +107,9 @@ namespace Tests
             var testProxy = TestProxy.GetStrongTypedClientProxy(_hubProxy);
 
             testProxy.subscribableEventWithParameter(paramter => { });
+
+            A.CallTo(() => _hubProxy.Subscribe("subscribableEventWithParameter"))
+                .MustHaveHappened(Repeated.Exactly.Once);
         }
 
         [Test]
