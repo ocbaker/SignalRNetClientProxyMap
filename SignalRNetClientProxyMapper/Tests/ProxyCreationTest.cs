@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Security.Cryptography.X509Certificates;
 using System.Threading.Tasks;
 using FakeItEasy;
 using FluentAssertions;
@@ -20,6 +21,7 @@ namespace Tests
 
         IHubProxy _hubProxy;
         const ITestProxy TestProxy = null;
+        const ITestProxyWithBaseMembers TestProxyWithBaseMembers = null;
         HubConnection _hubConnection;
 
         [Test]
@@ -120,6 +122,19 @@ namespace Tests
         }
 
         [Test]
+        public void CreateProxyWithBaseMembers() {
+            var testProxy = TestProxyWithBaseMembers.GetStrongTypedClientProxy(_hubProxy);
+
+            testProxy.ActionInTopLevelInterface();
+            testProxy.ActionInBaseInterface();
+
+            A.CallTo(() => _hubProxy.Invoke("ActionInTopLevelInterface"))
+                .MustHaveHappened(Repeated.Exactly.Once);
+            A.CallTo(() => _hubProxy.Invoke("ActionInBaseInterface"))
+                .MustHaveHappened(Repeated.Exactly.Once);
+        }
+
+        [Test]
         public void GetHubNameDesNotStripI() {
             ClientHubProxyExtensions.GetHubName<ITestProxy>(false)
                 .Should()
@@ -146,15 +161,24 @@ namespace Tests
         public void ShouldFailBecauseNonTasksInProxy() {
             IFailingProxyWithInvalidMethodSignature testProxy = null;
 
-            testProxy.Invoking(x => x = x.GetStrongTypedClientProxy(_hubProxy))
+            testProxy.Invoking(x => x.GetStrongTypedClientProxy(_hubProxy))
                 .ShouldThrow<ArgumentException>("Proxy should never accept anything other than Task & Task<T>");
+        }
+
+        [Test]
+        public void ShouldFailBecauseMethodHasBeenSpecifiedAsNotMapped() {
+            var testProxy = TestProxy.GetStrongTypedClientProxy(_hubProxy);
+
+            testProxy.ActionThatIsNotMapped();
+
+            A.CallTo(() => _hubProxy.Invoke("ActionThatIsNotMapped")).MustNotHaveHappened();
         }
 
         [Test]
         public void ShouldFailBecauseOverloadsNotSupported() {
             IFailingProxyWithOverloadingMethod testProxy = null;
 
-            testProxy.Invoking(x => x = x.GetStrongTypedClientProxy(_hubProxy))
+            testProxy.Invoking(x => x.GetStrongTypedClientProxy(_hubProxy))
                 .ShouldThrow<NotSupportedException>("Proxy do not currently support Overloading Methods");
         }
 
@@ -196,6 +220,15 @@ namespace Tests
         Task ActionWithVoidReturn(object variable);
     }
 
+    public interface ITestProxyBaseWithMembers : IClientHubProxyBase
+    {
+        Task ActionInBaseInterface();
+    }
+    public interface ITestProxyWithBaseMembers : ITestProxyBaseWithMembers
+    {
+        Task ActionInTopLevelInterface();
+    }
+
     [HubName("TestProxy")]
     public interface ITestProxyWithAttributeHubName : IClientHubProxyBase {}
 
@@ -213,6 +246,9 @@ namespace Tests
 
         [HubMethodName("AlternativeName")]
         Task ActionWithNoParametersAndAlternativeName();
+
+        [NotMapped]
+        Task ActionThatIsNotMapped();
 
         Task<string> FunctionWithNoParameters();
         Task<string> FunctionWithParameter(string message);
