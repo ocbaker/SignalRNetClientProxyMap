@@ -118,8 +118,8 @@ namespace SignalRNetClientProxyMapper
             Justification = "SignalR has built-in limitations we must comply with.")]
         // ReSharper disable once MemberCanBePrivate.Global
         internal static void MapGenericReturnFunctions(ClientHubProxyBase proxy, MethodInfo method) {
-            Contract.Requires<ArgumentOutOfRangeException>(method.GetParameters().Length <= 10,
-                "The Proxy mapper only supports methods with up to 10 parameters");
+            Contract.Requires<ArgumentOutOfRangeException>(method.GetParameters().Length <= 7,
+                "The Proxy mapper only supports methods with up to 7 parameters");
 
             var arguments = method.ReturnType.GetGenericArguments();
             var invokeReturnInstance = InvokeReturnMethod.MakeGenericMethod(arguments);
