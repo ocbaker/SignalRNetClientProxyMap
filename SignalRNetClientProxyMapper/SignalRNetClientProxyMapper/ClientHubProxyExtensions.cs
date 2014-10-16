@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Contracts;
+using System.Linq;
 using System.Reflection;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
@@ -73,8 +75,8 @@ namespace SignalRNetClientProxyMapper
             var type = typeof (T);
             dynamic proxy = new ClientHubProxyBase(hubProxy);
 
-            foreach (
-                var method in type.GetMethods(BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly)) {
+            var methodInfos = GetMethods(type).Distinct().Where(x => !IsMappingDisabled(x));
+            foreach (var method in methodInfos) {
                 if (method.IsSpecialName &&
                     (method.Name.StartsWith("set_", StringComparison.Ordinal) ||
                      method.Name.StartsWith("get_", StringComparison.Ordinal)))
@@ -97,6 +99,15 @@ namespace SignalRNetClientProxyMapper
             }
 
             return Impromptu.ActLike<T>(proxy);
+        }
+
+        internal static IEnumerable<MethodInfo> GetMethods(Type type) {
+            foreach (var method in type.GetMethods(BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly)) {
+                yield return method;
+            }
+            foreach (var method in type.GetInterfaces().SelectMany(GetMethods)) {
+                yield return method;
+            }
         }
 
         // ReSharper disable once MemberCanBePrivate.Global
@@ -181,6 +192,10 @@ namespace SignalRNetClientProxyMapper
                                 new object[] {hubName, new object[] {arg1, arg2, arg3, arg4, arg5, arg6, arg7}})));
                 break;
             }
+        }
+
+        internal static bool IsMappingDisabled(MethodInfo method) {
+            return method.GetCustomAttribute<NotMappedAttribute>(false) != null;
         }
 
         // ReSharper disable once MemberCanBePrivate.Global

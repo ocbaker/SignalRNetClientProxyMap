@@ -17,6 +17,7 @@ namespace SignalRNetClientProxyMapper
         /// <returns>A task that represents when invocation returned.</returns>
         [Obsolete(
             "You should define the function you wish to call inside your interface strongly. (Task NameOfAction(...))")]
+        [NotMapped]
         Task Invoke(string method, params object[] args);
 
         /// <summary>
@@ -29,6 +30,7 @@ namespace SignalRNetClientProxyMapper
         [Obsolete(
             "You should define the function you wish to call inside your interface strongly. (Task<TReturn> NameOfFunction(...))"
             )]
+        [NotMapped]
         Task<T> Invoke<T>(string method, params object[] args);
 
         /// <summary>
@@ -40,6 +42,7 @@ namespace SignalRNetClientProxyMapper
         [Obsolete(
             "You should define the event you wish to observe inside your interface strongly. (IObservable<TReturn> NameOfEvent {get;})"
             )]
+        [NotMapped]
         Subscription Subscribe(string eventName);
     }
 }

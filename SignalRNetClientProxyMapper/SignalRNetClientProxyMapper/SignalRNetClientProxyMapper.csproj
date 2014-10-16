@@ -142,6 +142,7 @@
     <Compile Include="HubMethodNameAttribute.cs" />
     <Compile Include="HubNameAttribute.cs" />
     <Compile Include="IClientHubProxyBase.cs" />
+    <Compile Include="NotMappedAttribute.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
