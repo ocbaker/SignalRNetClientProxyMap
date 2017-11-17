@@ -128,9 +128,7 @@ namespace SignalRNetClientProxyMapper
             var hubName = GetHubMethodName(method);
 
             if (proxy.ContainsKey(name))
-            {
                 throw new NotSupportedException("Overloading is not supported. Please check for following method name in your client-server implementation:'" + name + "'");
-            }
 
             proxy.Add(name,
                 (Func<dynamic, IDisposable>)(action => HubProxyExtensions.On(proxy.HubProxy, hubName, action)));
